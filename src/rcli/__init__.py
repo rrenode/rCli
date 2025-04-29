@@ -2,7 +2,7 @@ import sys
 import logging
 import sys
 
-from rcli import __version__
+#from rcli import __version__
 
 __author__ = "rrenode"
 __copyright__ = "rrenode"

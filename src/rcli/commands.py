@@ -39,6 +39,7 @@ def auto_import_subcommands(commands_dir: str) -> None:
         return
     
     if getattr(sys, 'frozen', False):
+        print("RUNNIN FOR FORZEN")
         # Running in a PyInstaller bundle
         package_name = commands_dir.replace('/', '.').replace('\\', '.')
         import_frozen_submodules(package_name)
