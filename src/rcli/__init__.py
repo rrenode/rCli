@@ -30,8 +30,10 @@ from .commands import auto_import_subcommands
 from .parser import parse_args
 
 class rCli:
-    def __init__(self):
-        auto_import_subcommands("commands")
+    def __init__(self, auto_import=False):
+        if auto_import:
+            raise NotImplementedError("pph help not yet implemented.")
+            auto_import_subcommands("commands")
         self.registry = CommandRegistry()
         
         self.__parse__()

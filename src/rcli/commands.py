@@ -31,6 +31,9 @@ class CommandHandler:
 
 def auto_import_subcommands(commands_dir: str) -> None:
     """Automatically imports all Python modules in the commands directory."""
+    #abs_path = Path(commands_dir).resolve()
+    #sys.path.append(abs_path)
+    
     if getattr(sys, 'frozen', False):
         # PyInstaller EXE mode
         print("[rCli] Running in frozen mode. Importing submodules dynamically.")
@@ -39,9 +42,6 @@ def auto_import_subcommands(commands_dir: str) -> None:
     else:
         # Normal filesystem mode
         commands_path = Path(commands_dir)
-
-        if not commands_path.is_dir():
-            return
         
         print("[rCli] Importing subcommands from filesystem.")
         
