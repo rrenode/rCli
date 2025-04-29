@@ -31,38 +31,40 @@ class CommandHandler:
         return decorator
 
 def auto_import_subcommands(commands_dir: str) -> None:
-    """Automatically imports all Python files in the commands directory to register subcommands."""
-    commands_path = Path(commands_dir)
-
-    # Check if the provided directory exists
-    if not commands_path.is_dir():
-        return
-    print("IMPORTING")
+    """Automatically imports all Python modules in the commands directory."""
     if getattr(sys, 'frozen', False):
-        print("RUNNIN FOR FORZEN")
-        # Running in a PyInstaller bundle
+        # PyInstaller EXE mode
+        print("[rCli] Running in frozen mode. Importing submodules dynamically.")
         package_name = commands_dir.replace('/', '.').replace('\\', '.')
         import_frozen_submodules(package_name)
-    
-    # Recursively import all Python files in the commands directory
-    for file in commands_path.rglob("*.py"):  # This searches for all .py files recursively
-        module_name = file.stem  # Get the module name (file name without .py)
+    else:
+        # Normal filesystem mode
+        commands_path = Path(commands_dir)
 
-        # If the module is already in sys.modules, reload it to ensure it's executed
-        if module_name in sys.modules:
-            module = sys.modules[module_name]
-            importlib.reload(module)
-        else:
-            # Dynamically import the module using importlib
-            spec = importlib.util.spec_from_file_location(module_name, str(file))
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)  # Execute the module to apply decorators
-            sys.modules[module_name] = module
+        if not commands_path.is_dir():
+            return
+        
+        print("[rCli] Importing subcommands from filesystem.")
+        
+        # Import manually by scanning files
+        for file in commands_path.rglob("*.py"):
+            if file.name == "__init__.py":
+                continue  # Skip __init__.py
+            
+            # Build full module path
+            rel_path = file.relative_to(Path.cwd())
+            module_name = ".".join(rel_path.with_suffix('').parts)
+            print(f"[rCli] Importing {module_name}")
+
+            if module_name in sys.modules:
+                importlib.reload(sys.modules[module_name])
+            else:
+                importlib.import_module(module_name)
 
 def import_frozen_submodules(package_name: str) -> None:
-    """Import all submodules when running frozen (PyInstaller)."""
-    import pkgutil
+    """Import all submodules when running frozen."""
     for loader, module_name, is_pkg in pkgutil.walk_packages(None, prefix=package_name + "."):
+        print(f"[rCli] Importing frozen module {module_name}")
         if module_name in sys.modules:
             importlib.reload(sys.modules[module_name])
         else:
