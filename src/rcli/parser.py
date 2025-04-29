@@ -73,3 +73,48 @@ def parse_args(args: list[str]) -> CliArgs:
 
     parse()
     return pa
+
+def reconstruct_args(parsed: CliArgs, ignore_global=False, ignore_program=True) -> List[str]:
+    args = []
+
+    if not ignore_program:
+        # Start with program name
+        args.append(parsed.program)
+
+    # Add global options
+    if not ignore_global:
+        for name, value in parsed.global_options.items():
+            if ',' in value:
+                # If values were joined with commas, split them again
+                for val in value.split(','):
+                    args.append(f"--{name}={val}")
+            else:
+                args.append(f"--{name}={value}")
+
+        # Add global flags
+        for flag in parsed.global_flags:
+            args.append(f"--{flag}")
+
+        # Add main command
+        if parsed.command:
+            args.append(parsed.command)
+
+    # Add subcommands
+    args.extend(parsed.subcommands)
+
+    # Add local options
+    for name, value in parsed.local_options.items():
+        if ',' in value:
+            for val in value.split(','):
+                args.append(f"--{name}={val}")
+        else:
+            args.append(f"--{name}={value}")
+
+    # Add local flags
+    for flag in parsed.local_flags:
+        args.append(f"--{flag}")
+
+    # Add positional arguments
+    args.extend(parsed.positionals)
+
+    return args
