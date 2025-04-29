@@ -1,4 +1,14 @@
 import sys
+import logging
+import sys
+
+from rcli import __version__
+
+__author__ = "rrenode"
+__copyright__ = "rrenode"
+__license__ = "MIT"
+
+_logger = logging.getLogger(__name__)
 
 if sys.version_info[:2] >= (3, 8):
     # TODO: Import directly (no need for conditional) when `python_requires = >= 3.8`
