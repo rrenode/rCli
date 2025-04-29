@@ -12,7 +12,7 @@ class CliArgs:
     local_options: Dict[str, str] = field(default_factory=dict)
     local_flags: Set[str] = field(default_factory=set)
     positionals: List[str] = field(default_factory=list)
-
+    
 def parse_args(args: list[str]) -> CliArgs:
     parsed_args = pa = CliArgs()
     pa.program = args.pop(0)

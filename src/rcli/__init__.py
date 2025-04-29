@@ -35,7 +35,7 @@ class rCli:
             raise NotImplementedError("pph help not yet implemented.")
             auto_import_subcommands("commands")
         self.registry = CommandRegistry()
-        
+        self.raw_args = sys.argv
         self.__parse__()
     
     @property
@@ -50,5 +50,4 @@ class rCli:
         self.registry.register(handler, name)
     
     def __parse__(self):
-        self.raw_args = sys.argv
         self.args = parse_args(self.raw_args)
