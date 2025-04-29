@@ -1,4 +1,5 @@
 import os
+import importlib
 import importlib.util
 import sys
 from pathlib import Path
@@ -37,6 +38,11 @@ def auto_import_subcommands(commands_dir: str) -> None:
     if not commands_path.is_dir():
         return
     
+    if getattr(sys, 'frozen', False):
+        # Running in a PyInstaller bundle
+        package_name = commands_dir.replace('/', '.').replace('\\', '.')
+        import_frozen_submodules(package_name)
+    
     # Recursively import all Python files in the commands directory
     for file in commands_path.rglob("*.py"):  # This searches for all .py files recursively
         module_name = file.stem  # Get the module name (file name without .py)
@@ -51,6 +57,15 @@ def auto_import_subcommands(commands_dir: str) -> None:
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)  # Execute the module to apply decorators
             sys.modules[module_name] = module
+
+def import_frozen_submodules(package_name: str) -> None:
+    """Import all submodules when running frozen (PyInstaller)."""
+    import pkgutil
+    for loader, module_name, is_pkg in pkgutil.walk_packages(None, prefix=package_name + "."):
+        if module_name in sys.modules:
+            importlib.reload(sys.modules[module_name])
+        else:
+            importlib.import_module(module_name)
 
 def cog(name_or_cls=None):
     """Decorator to register a subcommand handler."""
