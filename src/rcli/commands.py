@@ -1,6 +1,5 @@
-import os
 import importlib
-import importlib.util
+import pkgutil
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -64,6 +63,13 @@ def auto_import_subcommands(commands_dir: str) -> None:
 def import_frozen_submodules(package_name: str) -> None:
     """Import all submodules when running frozen."""
     for loader, module_name, is_pkg in pkgutil.walk_packages(None, prefix=package_name + "."):
+        # Only import modules that are direct children of our package
+        if not module_name.startswith(package_name + "."):
+            continue
+        if "._" in module_name:
+            # Skip private/internal frozen modules
+            continue
+
         print(f"[rCli] Importing frozen module {module_name}")
         if module_name in sys.modules:
             importlib.reload(sys.modules[module_name])
