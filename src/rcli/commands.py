@@ -37,7 +37,7 @@ def auto_import_subcommands(commands_dir: str) -> None:
     # Check if the provided directory exists
     if not commands_path.is_dir():
         return
-    
+    print("IMPORTING")
     if getattr(sys, 'frozen', False):
         print("RUNNIN FOR FORZEN")
         # Running in a PyInstaller bundle
