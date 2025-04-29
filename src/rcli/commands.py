@@ -62,19 +62,14 @@ def auto_import_subcommands(commands_dir: str) -> None:
 
 def import_frozen_submodules(package_name: str) -> None:
     """Import all submodules when running frozen."""
-    for loader, module_name, is_pkg in pkgutil.walk_packages(None, prefix=package_name + "."):
-        # Only import modules that are direct children of our package
-        if not module_name.startswith(package_name + "."):
-            continue
-        if "._" in module_name:
-            # Skip private/internal frozen modules
-            continue
-
-        print(f"[rCli] Importing frozen module {module_name}")
-        if module_name in sys.modules:
-            importlib.reload(sys.modules[module_name])
-        else:
-            importlib.import_module(module_name)
+    print("[rCli] Importing frozen modules:")
+    for name in list(sys.modules):
+        if name.startswith(package_name + "."):
+            try:
+                print(f"[rCli] Importing {name}")
+                importlib.import_module(name)
+            except ModuleNotFoundError:
+                pass  # Skip missing ones
 
 def cog(name_or_cls=None):
     """Decorator to register a subcommand handler."""
