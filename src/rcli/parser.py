@@ -12,6 +12,7 @@ class CliArgs:
     local_options: Dict[str, str] = field(default_factory=dict)
     local_flags: Set[str] = field(default_factory=set)
     positionals: List[str] = field(default_factory=list)
+    slash_args: List[str] = field(default_factory=list) 
     
 def parse_args(args: list[str]) -> CliArgs:
     parsed_args = pa = CliArgs()
@@ -36,7 +37,7 @@ def parse_args(args: list[str]) -> CliArgs:
     def parse():
         while args:
             arg = args.pop(0)
-
+            
             # --key=value
             if re.match(r"^--[\w-]+=.+$", arg):
                 name, val = arg[2:].split("=", 1)
