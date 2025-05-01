@@ -62,6 +62,9 @@ def parse_args(args: list[str]) -> CliArgs:
                     set_option(name, val)
                 else:
                     set_flag(name)
+            # "Search queries as command"
+            elif re.match(r"^[@:#].+", arg):
+                pa.command = arg  # e.g., @alias, :name, #id
             # Command
             elif not pa.command:
                 pa.command = arg

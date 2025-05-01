@@ -14,7 +14,7 @@ registry = CommandRegistry()
 class CommandHandler:
     # Class-level dictionary to store commands
     commands = {}
-        
+    depends_context = True
     """Abstract base for all subcommand handlers."""
     def run(self, args: List[str], ctx: Optional[str] = None):
         raise NotImplementedError("Subcommands must implement run()")
