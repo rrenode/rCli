@@ -16,7 +16,7 @@ class CommandHandler:
     commands = {}
     depends_context = True
     """Abstract base for all subcommand handlers."""
-    def run(self, args: List[str], ctx: Optional[str] = None):
+    def run(self, args: List[str], ctx: Optional[object] = None):
         raise NotImplementedError("Subcommands must implement run()")
     
     @classmethod
