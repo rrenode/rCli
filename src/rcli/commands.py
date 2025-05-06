@@ -11,23 +11,27 @@ from .registry import CommandRegistry
 logger = getLogger("rCli.commands")
 registry = CommandRegistry()
 
-class CommandHandler:
+class CommandMeta(type):
+    def __new__(cls, name, bases, dct):
+        dct['commands'] = {}
+        for attr_name, attr_value in dct.items():
+            if hasattr(attr_value, '_command_name'):
+                dct['commands'][attr_value._command_name] = attr_value
+        return super().__new__(cls, name, bases, dct)
+
+class CommandHandler(metaclass=CommandMeta):
     # Class-level dictionary to store commands
     commands = {}
     depends_context = True
     """Abstract base for all subcommand handlers."""
     def run(self, args: List[str], ctx: Optional[object] = None):
         raise NotImplementedError("Subcommands must implement run()")
-    
-    @classmethod
-    def command(cls, name):
-        """Command decorator that registers methods as commands at the class level."""
-        def decorator(func):
-            if not hasattr(cls, 'commands'):
-                cls.commands = {}
-            cls.commands[name] = func
-            return func
-        return decorator
+
+def subcommand(name):
+    def decorator(func):
+        func._command_name = name
+        return func
+    return decorator
 
 def auto_import_subcommands(commands_dir: str) -> None:
     """Automatically imports all Python modules in the commands directory."""
