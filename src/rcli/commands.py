@@ -66,6 +66,7 @@ def auto_import_subcommands(commands_dir: str) -> None:
 
 def import_frozen_submodules(package_name: str) -> None:
     """Import all submodules when running frozen."""
+    # Todo: Remove all uses of print in favor of logger
     print("[rCli] Importing frozen modules:")
     for name in list(sys.modules):
         if name.startswith(package_name + "."):

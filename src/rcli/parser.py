@@ -38,8 +38,12 @@ def parse_args(args: list[str]) -> CliArgs:
         while args:
             arg = args.pop(0)
             
+            # slash args
+            if re.match(r"^/[\w-]+$", arg):
+                pa.slash_args.append(arg[1:])  # store without the slash
+                continue
             # --key=value
-            if re.match(r"^--[\w-]+=.+$", arg):
+            elif re.match(r"^--[\w-]+=.+$", arg):
                 name, val = arg[2:].split("=", 1)
                 set_option(name, val)
             # --flag or --key (space-separated value)
