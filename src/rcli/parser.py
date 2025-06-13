@@ -18,8 +18,10 @@ def parse_args(args: list[str]) -> CliArgs:
     parsed_args = pa = CliArgs()
     pa.program = args.pop(0)
 
+    passed_global_scope = False
+
     def current_scope():
-        return ("global_options", "global_flags") if not pa.command else ("local_options", "local_flags")
+        return ("global_options", "global_flags") if not passed_global_scope else ("local_options", "local_flags")
 
     def set_option(name: str, value: str):
         opt_dict, _ = current_scope()
@@ -35,6 +37,7 @@ def parse_args(args: list[str]) -> CliArgs:
         getattr(pa, flag_set).add(name)
 
     def parse():
+        nonlocal passed_global_scope
         while args:
             arg = args.pop(0)
             
@@ -42,6 +45,7 @@ def parse_args(args: list[str]) -> CliArgs:
             context_prefixes = ["/", "?#", "?@", "??"]
             if any(arg.startswith(prefix) for prefix in context_prefixes):
                 pa.context_args.append(arg)
+                passed_global_scope = True
             # --key=value
             elif re.match(r"^--[\w-]+=.+$", arg):
                 name, val = arg[2:].split("=", 1)
@@ -72,6 +76,7 @@ def parse_args(args: list[str]) -> CliArgs:
             # Command
             elif not pa.command:
                 pa.command = arg
+                passed_global_scope = True
             # First subcommand
             elif not pa.subcommands:
                 pa.subcommands.append(arg)
@@ -91,6 +96,9 @@ def reconstruct_args(parsed: CliArgs, ignore_global=False, ignore_program=True) 
     # Add context arguments first
     args.extend(parsed.context_args)
 
+    if parsed.command:
+        args.append(parsed.command)
+
     # Add global options
     if not ignore_global:
         for name, value in parsed.global_options.items():
@@ -102,9 +110,6 @@ def reconstruct_args(parsed: CliArgs, ignore_global=False, ignore_program=True) 
 
         for flag in parsed.global_flags:
             args.append(f"--{flag}")
-
-        if parsed.command:
-            args.append(parsed.command)
 
     args.extend(parsed.subcommands)
 
