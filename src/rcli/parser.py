@@ -41,7 +41,7 @@ def parse_args(args: list[str]) -> CliArgs:
             # Handle context-symbol-prefixed args
             context_prefixes = ["/", "?#", "?@", "??"]
             if any(arg.startswith(prefix) for prefix in context_prefixes):
-                pa.symbol_args.append(arg)
+                pa.context_args.append(arg)
             # --key=value
             elif re.match(r"^--[\w-]+=.+$", arg):
                 name, val = arg[2:].split("=", 1)
@@ -86,31 +86,28 @@ def reconstruct_args(parsed: CliArgs, ignore_global=False, ignore_program=True) 
     args = []
 
     if not ignore_program:
-        # Start with program name
         args.append(parsed.program)
+
+    # Add context arguments first
+    args.extend(parsed.context_args)
 
     # Add global options
     if not ignore_global:
         for name, value in parsed.global_options.items():
             if ',' in value:
-                # If values were joined with commas, split them again
                 for val in value.split(','):
                     args.append(f"--{name}={val}")
             else:
                 args.append(f"--{name}={value}")
 
-        # Add global flags
         for flag in parsed.global_flags:
             args.append(f"--{flag}")
 
-        # Add main command
         if parsed.command:
             args.append(parsed.command)
 
-    # Add subcommands
     args.extend(parsed.subcommands)
 
-    # Add local options
     for name, value in parsed.local_options.items():
         if ',' in value:
             for val in value.split(','):
@@ -118,11 +115,9 @@ def reconstruct_args(parsed: CliArgs, ignore_global=False, ignore_program=True) 
         else:
             args.append(f"--{name}={value}")
 
-    # Add local flags
     for flag in parsed.local_flags:
         args.append(f"--{flag}")
 
-    # Add positional arguments
     args.extend(parsed.positionals)
 
     return args
