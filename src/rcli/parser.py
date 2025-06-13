@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Any
 import re
 
 @dataclass
@@ -12,7 +12,7 @@ class CliArgs:
     local_options: Dict[str, str] = field(default_factory=dict)
     local_flags: Set[str] = field(default_factory=set)
     positionals: List[str] = field(default_factory=list)
-    slash_args: List[str] = field(default_factory=list) 
+    context_args: List[str] = field(default_factory=list) 
     
 def parse_args(args: list[str]) -> CliArgs:
     parsed_args = pa = CliArgs()
@@ -38,10 +38,10 @@ def parse_args(args: list[str]) -> CliArgs:
         while args:
             arg = args.pop(0)
             
-            # slash args
-            if re.match(r"^/[\w-]+$", arg):
-                pa.slash_args.append(arg[1:])  # store without the slash
-                continue
+            # Handle context-symbol-prefixed args
+            context_prefixes = ["/", "?#", "?@", "??"]
+            if any(arg.startswith(prefix) for prefix in context_prefixes):
+                pa.symbol_args.append(arg)
             # --key=value
             elif re.match(r"^--[\w-]+=.+$", arg):
                 name, val = arg[2:].split("=", 1)
